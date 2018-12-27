@@ -1,6 +1,6 @@
 // Michaela Vuklisevicova
 // COMSC-110 Term Project, Spring 2017
-// Pull out all the email addresses from a text file
+// Pull out all the VALID email addresses from a text file
 
 #include <cctype>
 #include <algorithm>
@@ -10,17 +10,17 @@
 using namespace std;
 
 
-class toLower {public: char operator()(char c) const {return tolower(c);}};
+class toLower { public: char operator()(char c) const { return tolower(c); } };
 
 string getFileName()
 {
 	string result;
 	cout << "Enter the file name: ";
-	getline (cin, result);
+	getline(cin, result);
 	return result;
 } // getFileName
 
-bool isValidEmailCharacter (char c)
+bool isValidEmailCharacter(char c)
 {
 	bool result = false;
 	if (c >= 'A' && c <= 'Z') result = true;
@@ -35,7 +35,7 @@ int main()
 	// default file names
 	string defaultInput = "fileContainingEmails.txt";
 	string defaultOutput = "copyPasteMyEmails.txt";
-			
+
 	// empty list for up to 1,000 email addresses
 	const int CAPACITY = 1000;
 	int nEmails = 0;
@@ -61,29 +61,29 @@ int main()
 		fin.open(fileName.c_str());
 		if (!fin.good()) throw "I/O error";
 	} // else
-		
+
 	int startIndex;
 	int endIndex;
 	string lcEmail[CAPACITY];
 	while (fin.good())
 	{
 		string lineOfTheFile;
-		getline (fin, lineOfTheFile);
-		
+		getline(fin, lineOfTheFile);
+
 		int dotCounter = 0;
 		for (int i = 0; i < lineOfTheFile.length(); i++)
 		{
 			if (lineOfTheFile[i] == '@')
 			{
-				for (int j = i - 1; j > 0; j--)
+				for (int j = i - 1; j >= 0; j--)
 				{
 					char c = lineOfTheFile[j];
 					bool valid = isValidEmailCharacter(c);
 					if (valid != true) break;
 					startIndex = j;
 				} // for
-				
-				for (int k = i + 1; k < lineOfTheFile.length(); k ++)
+
+				for (int k = i + 1; k < lineOfTheFile.length(); k++)
 				{
 					char c = lineOfTheFile[k];
 					bool valid = isValidEmailCharacter(c);
@@ -91,25 +91,26 @@ int main()
 					if (c == '.') dotCounter++;
 					endIndex = k + 1;
 				} // for
-				
+
 				// store email addresses
-				if (nEmails < CAPACITY && dotCounter > 0) 
+				if (nEmails < CAPACITY && dotCounter > 0)
 					email[nEmails++] = lineOfTheFile.substr(startIndex, endIndex - startIndex);
 			} // if
-											
-			// erase duplicate email addresses - no matter casing
-			for (int i = 0; i < nEmails; i++)
-			{
-				lcEmail[i] = email[i];		//transfer all email addresses to lowercase form
-				transform(lcEmail[i].begin(), lcEmail[i].end(), lcEmail[i].begin(), toLower());
-			} // for 
-			for (int i = 0; i < (nEmails-1); i++)
-				if (lcEmail[nEmails-1] == lcEmail[i]) nEmails--;
+
+			// erase duplicate email addresses
+			if (nEmails) {
+				int index = (nEmails - 1);
+				lcEmail[index] = email[index];
+				//transfer the last inserted email address to lowercase form
+				transform(lcEmail[index].begin(), lcEmail[index].end(), lcEmail[index].begin(), toLower());
+				for (int i = 0; i < (nEmails - 1); i++)
+					if (lcEmail[index] == lcEmail[i]) nEmails--; // if last element is a duplicate, erase
+			} // if
 		} // for
 	} // while
 	fin.close();		// close the input file
 
-	// output file name*/
+	// output file
 	if (nEmails > 0)
 	{
 		ofstream fout;
@@ -130,16 +131,16 @@ int main()
 			if (!fout.good()) throw "I/O error";
 			defaultOutput = fileName;
 		} // else
-		
+
 		//	print each email to the output file
 		for (int i = 0; i < nEmails - 2; i++)
 			fout << email[i] << "; ";
-		fout << email[nEmails-1];
-		
+		fout << email[nEmails - 1];
+
 		fout.close();		// close the output file
 	} // if
-	
-		
+
+
 	// console output
 	if (nEmails == 0) cout << "Sorry, no valid email address was found in the file: " << defaultInput << endl;
 	for (int i = 0; i < nEmails; i++)
@@ -150,6 +151,6 @@ int main()
 	cout << "it to any 'to', 'cc', or 'bcc' field of your email message. For privacy ";
 	cout << "protection of the receivers, it is best to use the 'bcc' field, ";
 	cout << "as the other email addresses will not appear in the message." << endl;
-	
+
 	return 0;
 } // main
